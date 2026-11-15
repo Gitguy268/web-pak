@@ -111,7 +111,7 @@ try {
   // 8. tar.zst round trip through the UI
   await page.click('nav button[data-view="compress"]');
   await page.selectOption('#oFormat', 'tar.zst');
-  await page.fill('#oPassword', '');
+  check(!(await page.isVisible('#oPassword')), 'no password field for tar.zst');
   const [dl3] = await Promise.all([page.waitForEvent('download'), page.click('#doCompress')]);
   check(dl3.suggestedFilename() === 'e2e.tar.zst', `zstd tarball ${dl3.suggestedFilename()}`);
   const tzst = join(tmp, dl3.suggestedFilename()); await dl3.saveAs(tzst);

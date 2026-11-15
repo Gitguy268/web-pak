@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Engine tests (every format, encryption, volumes, zip slip, encodings)
+        run: npm test
+      - name: The committed app/ matches the sources
+        run: npm run check-build
+      - run: sudo apt-get install -y 7zip
+      - run: npx playwright install --with-deps chromium
+      - name: End-to-end test of the built app
+        run: npm run e2e

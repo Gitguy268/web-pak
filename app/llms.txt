@@ -1,0 +1,12 @@
+# web-pak
+
+> A file archiver in the browser, the web version of pakket: compress, extract, encrypt, browse, preview, edit and convert archives in 50+ formats. Everything runs on the user's device with 7-Zip compiled to WebAssembly; nothing is uploaded. MIT licence (7-Zip itself is LGPL, loaded as a separate file).
+
+- Makes: 7z, zip, tar, tar.gz, tar.bz2, tar.xz, tar.zst, tar.br, tar.lz4, wim, gz, bz2, xz, zst, br, lz4, age.
+- Opens: everything 7-Zip 24 reads (rar, iso, dmg, cab, msi, deb, rpm, apk, jar, split volumes and more) plus zst, br, lz4 and age.
+- Encryption: AES-256 7z with hidden names, AES-256 or ZipCrypto zip, age with passphrases or X25519 keys.
+
+## Links
+- [Use it](https://gitguy268.github.io/web-pak/)
+- [Source](https://github.com/Gitguy268/web-pak)
+- [pakket, the terminal version](https://github.com/Gitguy268/pakket)

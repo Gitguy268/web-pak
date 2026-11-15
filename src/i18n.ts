@@ -63,5 +63,6 @@ const NL: Record<string, string> = {
   'shown once, save it now': 'wordt maar één keer getoond, sla hem nu op', strong: 'sterk', volumes: 'volumes', waiting: 'wacht', weak: 'zwak',
   'web-pak is the browser version of pakket. It uses 7-Zip (7z-wasm), zstd, brotli, lz4, typage and hash-wasm. See NOTICE for their licences.': 'web-pak is de browserversie van pakket. Het gebruikt 7-Zip (7z-wasm), zstd, brotli, lz4, typage en hash-wasm. Zie NOTICE voor hun licenties.',
   '{n} groups of identical files; {size} could be saved.': '{n} groepen identieke bestanden; {size} kan bespaard worden.', '{n} more; search to narrow it down': 'nog {n}; zoek om te verfijnen',
+  'Packed together with other files (solid archive)': 'Samen met andere bestanden ingepakt (solide archief)',
   '{same} the same, {added} added, {removed} removed, {changed} changed.': '{same} gelijk, {added} toegevoegd, {removed} verwijderd, {changed} gewijzigd.',
 };

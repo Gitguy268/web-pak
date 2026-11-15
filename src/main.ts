@@ -310,7 +310,7 @@ function renderArchive() {
     const tr = h('tr', { tabIndex: 0, class: state.sel.has(id) ? 'sel' : '', ondblclick: () => (e.dir ? ((state.cwd = id), renderArchive()) : previewEntry(e.path)), onclick: (ev: MouseEvent) => { if ((ev.target as HTMLElement).matches('input')) return; if (!e.dir) previewEntry(e.path); else { state.cwd = id; renderArchive(); } } },
       h('td', { class: 'ck' }, h('input', { type: 'checkbox', checked: state.sel.has(id), 'aria-label': `${t('Select')} ${baseName(e.path)}`, onchange: (ev: Event) => { (ev.target as HTMLInputElement).checked ? state.sel.add(id) : state.sel.delete(id); tr.classList.toggle('sel'); } })),
       h('td', { class: 'nm', title: e.path }, `${e.dir ? '📁 ' : ''}${q ? e.path : baseName(e.path)}`, e.encrypted ? h('span', { class: 'lock', title: t('encrypted') }, ' 🔒') : ''),
-      h('td', { class: 'num' }, humanSize(e.size)), h('td', { class: 'num' }, e.dir ? '' : humanSize(e.packed)),
+      h('td', { class: 'num' }, humanSize(e.size)), h('td', { class: 'num', title: !e.dir && !e.packed && e.size ? t('Packed together with other files (solid archive)') : '' }, e.dir || (!e.packed && e.size) ? '' : humanSize(e.packed)),
       h('td', { class: 'num' }, e.size && e.packed ? `${Math.round((e.packed / e.size) * 100)}%` : ''), h('td', { class: 'small muted' }, e.modified.slice(0, 16)),
       h('td', {}, !e.dir ? h('button', { class: 'btn small', onclick: (ev: Event) => { ev.stopPropagation(); extractSome([e.path]); } }, '⤓') : ''));
     (tr as HTMLElement & { entry?: Entry }).entry = e;
