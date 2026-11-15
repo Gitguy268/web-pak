@@ -87,12 +87,12 @@ describe('volumes, testing and safety', () => {
     const out = await create(SAMPLE, { format: '7z', name: 't', level: 9 });
     expect((await testArchive(asInputs(out))).ok).toBe(true);
     const bad = out[0].data.slice(); for (let i = 40; i < 120; i++) bad[i] ^= 0x5a;
-    expect((await testArchive([{ path: 't.7z', data: new Blob([bad]) }])).ok).toBe(false);
+    expect((await testArchive([{ path: 't.7z', data: new Blob([bad as BlobPart]) }])).ok).toBe(false);
   }, 30000);
 
   it('refuses paths that climb out of the destination (zip slip)', async () => {
     const zip = storedZip([['../evil.txt', 'pwned'], ['ok/fine.txt', 'fine']]);
-    const ex = await extract([{ path: 'slip.zip', data: new Blob([zip]) }]);
+    const ex = await extract([{ path: 'slip.zip', data: new Blob([zip as BlobPart]) }]);
     expect(ex.files.some(f => f.path.includes('..'))).toBe(false);
     expect(textOf(ex.files, 'ok/fine.txt')).toBe('fine');
   }, 30000);
@@ -100,12 +100,12 @@ describe('volumes, testing and safety', () => {
   it('fixes Shift-JIS names in an old zip with the right code page', async () => {
     const sjis = new Uint8Array([0x93, 0xfa, 0x96, 0x7b, 0x2e, 0x74, 0x78, 0x74]); // 日本.txt
     const zip = storedZip([[sjis, 'konnichiwa']]);
-    const inp = [{ path: 'old.zip', data: new Blob([zip]) }];
+    const inp = [{ path: 'old.zip', data: new Blob([zip as BlobPart]) }];
     expect((await list(inp, { encoding: 'shift_jis' })).entries[0].path).toBe('日本.txt');
     const ex = await extract(inp, { encoding: 'shift_jis' });
     expect(textOf(ex.files, '日本.txt')).toBe('konnichiwa');
     const cp437 = storedZip([[new Uint8Array([0x82, 0x2e, 0x74, 0x78, 0x74]), 'e']]); // é.txt in DOS code page 437
-    expect((await list([{ path: 'dos.zip', data: new Blob([cp437]) }], { encoding: 'auto' })).entries[0].path).toBe('é.txt');
+    expect((await list([{ path: 'dos.zip', data: new Blob([cp437 as BlobPart]) }], { encoding: 'auto' })).entries[0].path).toBe('é.txt');
   }, 30000);
 
   it('unpacks the tar inside a tar.gz in one go, and lists through it', async () => {

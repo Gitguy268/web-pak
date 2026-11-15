@@ -1,0 +1,29 @@
+web-pak is MIT licensed, see LICENSE.
+
+It bundles these libraries, each under its own licence:
+
+- 7-Zip 24.09 compiled to WebAssembly by 7z-wasm 1.2.0 (github.com/use-strict/7z-wasm):
+  GNU LGPL 2.1 or later, plus the unRAR restriction for the RAR decompression code, which says
+  the unRAR code may not be used to re-create the RAR compression algorithm. 7-Zip is
+  copyright Igor Pavlov. The WebAssembly binary (app/assets/7zz-*.wasm) is shipped unchanged as
+  its own file, and 7z-wasm's small JavaScript loader is included unmodified in the worker
+  bundle. You can replace the .wasm file with your own build of the same 7z-wasm version
+  without rebuilding web-pak. The 7-Zip source code is at www.7-zip.org,
+  and the build scripts at github.com/use-strict/7z-wasm.
+- @bokuweb/zstd-wasm 0.0.27: MIT (JavaScript glue); zstd itself is BSD-3-Clause, copyright Meta
+  Platforms, Inc. and affiliates.
+- brotli-wasm 3.0.1 (github.com/httptoolkit/brotli-wasm): Apache-2.0; brotli itself is MIT,
+  copyright Google.
+- lz4js 0.2.0: ISC.
+- age-encryption (typage) 0.3.1 (github.com/FiloSottile/typage): BSD-3-Clause, copyright the
+  age authors.
+- hash-wasm 4.12.0 (github.com/Daninet/hash-wasm): MIT, copyright Dani Biró; the hash
+  implementations it compiles keep their own permissive licences.
+
+Build and test tools (Vite, TypeScript, Vitest, Playwright) are not shipped.
+
+Ideas, no code:
+- pakket (github.com/Gitguy268/pakket, same author, MIT): the feature set, naming and
+  extraction rules web-pak follows.
+- Keka (github.com/aonez/Keka, no licence): the options pakket and web-pak offer, such as
+  split presets, smart folders and leaving out Mac files.

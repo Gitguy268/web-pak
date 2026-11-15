@@ -1,0 +1,219 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT. Copyright (c) 2026 Lucas Van De Weerd. See LICENSE. -->
+<html lang="en">
+<head>
+<meta name="source-hash" content="2a598285b7d092cc">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>web-pak</title>
+<meta name="description" content="Compress, extract, encrypt, browse, preview, edit and convert archives in 50+ formats, in your browser. Nothing is uploaded: every file stays on your device.">
+<meta property="og:title" content="web-pak">
+<meta property="og:description" content="pakket in the browser: a file archiver for 7z, zip, rar, tar, zstd, age and more. Nothing leaves your device.">
+<meta property="og:image" content="https://gitguy268.github.io/web-pak/docs/screenshot.png">
+<meta name="theme-color" content="#16181d">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="manifest" href="./manifest.webmanifest">
+  <script type="module" crossorigin src="./assets/index-DZ79MLi0.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-HEyJ4iVt.css">
+</head>
+<body>
+<div id="boot-msg">
+  <h1>web-pak</h1>
+  <p id="boot-text">Loading…</p>
+</div>
+<script>
+  // Opened by double-click (file://): browsers don't run module workers or WebAssembly from there.
+  if (location.protocol === 'file:') document.getElementById('boot-text').innerHTML =
+    'web-pak runs its archive engine in WebAssembly, which browsers only allow from a web address.<br><br>' +
+    '<b>Double-click <code>start.command</code></b> in this folder (it starts a small local server and opens web-pak), ' +
+    'or use the live site: <a href="https://gitguy268.github.io/web-pak/">gitguy268.github.io/web-pak</a>.';
+</script>
+
+<div id="app" hidden>
+  <header class="top">
+    <a class="brand" href="./" aria-label="web-pak home"><svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true"><use href="#logo"/></svg><span>web-pak</span></a>
+    <nav aria-label="Views">
+      <button data-view="home" data-i18n="Home"></button>
+      <button data-view="compress" data-i18n="Compress"></button>
+      <button data-view="browse" data-i18n="Archive"></button>
+      <button data-view="tools" data-i18n="Tools"></button>
+      <button data-view="history" data-i18n="History"></button>
+      <button data-view="settings" data-i18n="Settings"></button>
+    </nav>
+    <div class="top-end">
+      <select id="themeSel" aria-label="Theme"></select>
+      <select id="langSel" aria-label="Language"><option value="en">EN</option><option value="nl">NL</option></select>
+      <button class="icon" id="helpBtn" aria-label="Keyboard shortcuts" title="?">?</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- home: the drop zone -->
+    <section id="v-home" class="view">
+      <div id="drop" class="drop" tabindex="0">
+        <svg viewBox="0 0 32 32" width="64" height="64" aria-hidden="true"><use href="#logo"/></svg>
+        <h1 data-i18n="Drop files, folders or archives here"></h1>
+        <p class="muted" data-i18n="Archives open, everything else gets compressed. Nothing is uploaded: every file stays on your device."></p>
+        <div class="row center">
+          <button class="btn primary" id="pickFiles" data-i18n="Choose files"></button>
+          <button class="btn" id="pickFolder" data-i18n="Choose a folder"></button>
+          <button class="btn" id="pickArchive" data-i18n="Open an archive"></button>
+        </div>
+        <p class="muted small" id="formatsLine"></p>
+      </div>
+      <div class="cards">
+        <div class="card"><b data-i18n="Make"></b><span data-i18n="7z, zip, tar, tar.gz, tar.bz2, tar.xz, tar.zst, tar.br, tar.lz4, wim, gz, bz2, xz, zst, br, lz4 and age."></span></div>
+        <div class="card"><b data-i18n="Open"></b><span data-i18n="50+ kinds, including rar, iso, dmg, cab, msi, deb, rpm, apk, jar and split volumes."></span></div>
+        <div class="card"><b data-i18n="Protect"></b><span data-i18n="AES-256 7z with hidden file names, AES-256 zip, and age with a passphrase or public keys."></span></div>
+        <div class="card"><b data-i18n="Look inside"></b><span data-i18n="Browse, search and preview files in an archive, then edit or convert it."></span></div>
+      </div>
+    </section>
+
+    <!-- compress -->
+    <section id="v-compress" class="view" hidden>
+      <div class="split">
+        <div class="pane">
+          <div class="pane-head"><h2 data-i18n="Files to compress"></h2><span class="muted" id="itemsTotal"></span>
+            <span class="grow"></span><button class="btn small" id="addFiles" data-i18n="Add files"></button><button class="btn small" id="addFolder" data-i18n="Add folder"></button><button class="btn small" id="clearItems" data-i18n="Clear"></button></div>
+          <ul id="itemList" class="items" aria-label="Files to compress"></ul>
+        </div>
+        <form class="pane options" id="optForm" autocomplete="off">
+          <div class="pane-head"><h2 data-i18n="Options"></h2><span class="grow"></span><select id="presetSel" aria-label="Presets"></select><button type="button" class="btn small" id="savePreset" data-i18n="Save as preset"></button></div>
+          <label><span data-i18n="Format"></span><select id="oFormat"></select></label>
+          <label><span data-i18n="Name"></span><input id="oName" spellcheck="false"></label>
+          <label id="rowLevel"><span><span data-i18n="Compression"></span> <output id="oLevelOut"></output></span><input type="range" id="oLevel" min="0" max="9" step="1"></label>
+          <fieldset id="rowPassword"><legend data-i18n="Password"></legend>
+            <div class="row"><input type="password" id="oPassword" placeholder="—" autocomplete="new-password"><button type="button" class="btn small" id="showPw" data-i18n="Show"></button><button type="button" class="btn small" id="genPw" data-i18n="Generate"></button></div>
+            <div class="strength"><i id="pwBar"></i></div><small class="muted" id="pwInfo"></small>
+            <label class="check" id="rowNames"><input type="checkbox" id="oNames"> <span data-i18n="Encrypt file names too"></span></label>
+            <label class="check" id="rowLegacy"><input type="checkbox" id="oLegacy"> <span data-i18n="Use ZipCrypto for old unzip tools (weak)"></span></label>
+            <label class="check"><input type="checkbox" id="oExportPw"> <span data-i18n="Also save the password as a text file"></span></label>
+          </fieldset>
+          <fieldset id="rowRecipients"><legend data-i18n="age public keys (optional, one per line)"></legend><textarea id="oRecipients" rows="2" spellcheck="false" placeholder="age1…"></textarea></fieldset>
+          <label class="check" id="rowSolid"><input type="checkbox" id="oSolid"> <span data-i18n="Solid archive (smaller, slower to change)"></span></label>
+          <label id="rowSplit"><span data-i18n="Split into volumes"></span><span class="row"><select id="oSplit"></select><input id="oSplitCustom" placeholder="100m" hidden></span></label>
+          <label class="check"><input type="checkbox" id="oSeparate"> <span data-i18n="One archive per item"></span></label>
+          <label class="check"><input type="checkbox" id="oMac"> <span data-i18n="Leave out .DS_Store, ._ files and __MACOSX"></span></label>
+          <label><span data-i18n="Also leave out (globs)"></span><input id="oExclude" placeholder="*.log, node_modules" spellcheck="false"></label>
+          <label><span data-i18n="Checksum file"></span><select id="oChecksum"><option value="none">—</option><option value="md5">MD5</option><option value="sha256">SHA-256</option></select></label>
+          <div class="row end"><button type="submit" class="btn primary big" id="doCompress" data-i18n="Compress"></button></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- browse an archive -->
+    <section id="v-browse" class="view" hidden>
+      <div id="noArchive" class="empty"><p data-i18n="No archive open."></p><button class="btn primary" id="pickArchive2" data-i18n="Open an archive"></button></div>
+      <div id="archiveView" hidden>
+        <div class="archive-head">
+          <div><h2 id="arcName"></h2><div class="muted small" id="arcInfo"></div></div>
+          <span class="grow"></span>
+          <div class="row wrap">
+            <button class="btn primary" id="aExtract" data-i18n="Extract all"></button>
+            <button class="btn" id="aExtractSel" data-i18n="Extract selected"></button>
+            <button class="btn" id="aTest" data-i18n="Test"></button>
+            <button class="btn" id="aConvert" data-i18n="Convert…"></button>
+            <button class="btn" id="aEdit" data-i18n="Edit"></button>
+            <button class="btn" id="aClose" data-i18n="Close"></button>
+          </div>
+        </div>
+        <div id="editBar" class="editbar" hidden>
+          <b data-i18n="Editing"></b><span class="muted small" id="editInfo"></span><span class="grow"></span>
+          <button class="btn small" id="eAdd" data-i18n="Add files"></button>
+          <button class="btn small" id="eRename" data-i18n="Rename"></button>
+          <button class="btn small" id="eDelete" data-i18n="Delete selected"></button>
+          <button class="btn small primary" id="eSave" data-i18n="Save as…"></button>
+          <button class="btn small" id="eCancel" data-i18n="Cancel"></button>
+        </div>
+        <div class="row tools-row">
+          <input id="search" type="search" placeholder="/ search" aria-label="Search in the archive">
+          <label id="encRow" class="row small" hidden><span data-i18n="Names"></span><select id="encSel"></select></label>
+          <span class="grow"></span><div id="sizeBar" class="sizebar" aria-label="Size by file type"></div>
+        </div>
+        <div class="browse">
+          <div class="tree pane" id="tree" aria-label="Folders"></div>
+          <div class="pane table-wrap">
+            <table id="table"><thead><tr>
+              <th class="ck"><input type="checkbox" id="selAll" aria-label="Select all"></th>
+              <th data-sort="name" data-i18n="Name"></th><th data-sort="size" class="num" data-i18n="Size"></th><th data-sort="packed" class="num" data-i18n="Packed"></th>
+              <th data-sort="ratio" class="num" data-i18n="Ratio"></th><th data-sort="modified" data-i18n="Modified"></th><th></th>
+            </tr></thead><tbody></tbody></table>
+          </div>
+          <aside class="pane preview" id="preview" aria-label="Preview"><p class="muted" data-i18n="Select a file to preview it here, without extracting the archive."></p></aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- tools -->
+    <section id="v-tools" class="view" hidden>
+      <div class="tabs" role="tablist">
+        <button role="tab" data-tab="sums" data-i18n="Checksums"></button>
+        <button role="tab" data-tab="compare" data-i18n="Compare archives"></button>
+        <button role="tab" data-tab="dupes" data-i18n="Duplicates"></button>
+        <button role="tab" data-tab="pw" data-i18n="Passwords"></button>
+        <button role="tab" data-tab="keys" data-i18n="age keys"></button>
+      </div>
+      <div class="tab" id="t-sums">
+        <p class="muted" data-i18n="Drop files to hash them. Paste a checksum list (sha256sum or md5sum format) to verify."></p>
+        <div class="row"><button class="btn primary" id="sumPick" data-i18n="Choose files"></button><select id="sumAlgos" multiple size="1" aria-label="Algorithms"></select></div>
+        <textarea id="sumList" rows="3" spellcheck="false" placeholder="e3b0c442…  file.zip"></textarea>
+        <table class="plain" id="sumTable"></table>
+      </div>
+      <div class="tab" id="t-compare" hidden>
+        <p class="muted" data-i18n="Pick two archives to see what was added, removed or changed between them."></p>
+        <div class="row"><button class="btn" id="cmpA" data-i18n="Archive A"></button><button class="btn" id="cmpB" data-i18n="Archive B"></button></div>
+        <div id="cmpOut"></div>
+      </div>
+      <div class="tab" id="t-dupes" hidden><p class="muted" data-i18n="Files with the same size and CRC in the open archive."></p><div id="dupOut"></div></div>
+      <div class="tab" id="t-pw" hidden>
+        <div class="row wrap"><label><span data-i18n="Length"></span> <input type="number" id="pwLen" min="8" max="128" value="24"></label>
+          <label class="check"><input type="checkbox" id="pwSym" checked> <span data-i18n="Symbols"></span></label>
+          <label class="check"><input type="checkbox" id="pwWords"> <span data-i18n="Words instead"></span></label>
+          <button class="btn primary" id="pwGen" data-i18n="Generate"></button></div>
+        <output id="pwOut" class="mono big-out"></output><div class="strength"><i id="pwBar2"></i></div><small class="muted" id="pwInfo2"></small>
+        <div class="row"><input type="text" id="pwTest" placeholder="Test a password" autocomplete="off" spellcheck="false"></div>
+      </div>
+      <div class="tab" id="t-keys" hidden>
+        <p class="muted" data-i18n="Make an age key pair. Share the public key; keep the secret key. Anyone can encrypt to the public key, only the secret key decrypts."></p>
+        <button class="btn primary" id="keyGen" data-i18n="Make a key pair"></button>
+        <div id="keyOut"></div>
+      </div>
+    </section>
+
+    <section id="v-history" class="view" hidden>
+      <div class="pane-head"><h2 data-i18n="History"></h2><span class="muted small" data-i18n="Names, sizes and times only. Kept in this browser."></span><span class="grow"></span><button class="btn small" id="histClear" data-i18n="Clear"></button></div>
+      <table class="plain" id="histTable"></table>
+    </section>
+
+    <section id="v-settings" class="view" hidden>
+      <form id="setForm" class="pane options narrow">
+        <h2 data-i18n="Settings"></h2>
+        <label><span data-i18n="Dropping files"></span><select id="sDrop"></select></label>
+        <label><span data-i18n="Extract into a folder"></span><select id="sFolder"></select></label>
+        <label><span data-i18n="Save results"></span><select id="sSave"></select></label>
+        <p class="muted small" id="fsNote"></p>
+        <h3 data-i18n="Presets"></h3><ul id="presetList" class="plain-list"></ul>
+        <h3 data-i18n="About"></h3>
+        <p class="muted small" data-i18n="web-pak is the browser version of pakket. It uses 7-Zip (7z-wasm), zstd, brotli, lz4, typage and hash-wasm. See NOTICE for their licences."></p>
+        <p class="small"><a href="https://github.com/Gitguy268/web-pak">GitHub</a> · <a href="https://github.com/Gitguy268/pakket">pakket</a> · <a href="./NOTICE.txt">NOTICE</a></p>
+      </form>
+    </section>
+  </main>
+
+  <aside id="dock" aria-label="Jobs" hidden><div class="dock-head"><b data-i18n="Jobs"></b><span class="grow"></span><button class="btn small" id="dockClear" data-i18n="Clear"></button><button class="btn small" id="dockMin" aria-label="Minimise the job list">▾</button></div><ul id="jobList"></ul></aside>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="dropOverlay" hidden><div data-i18n="Drop to add"></div></div>
+</div>
+
+<dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="row end" id="dlgButtons"></div></form></dialog>
+<input type="file" id="fileIn" multiple hidden>
+<input type="file" id="dirIn" webkitdirectory multiple hidden>
+<input type="file" id="arcIn" multiple hidden>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="logo" viewBox="0 0 32 32">
+  <rect x="4" y="9" width="24" height="19" rx="3" fill="var(--box, #c98a3a)"/><path d="M4 12h24" stroke="#00000033" stroke-width="2"/>
+  <rect x="6" y="4" width="20" height="7" rx="2" fill="var(--lid, #e3a95a)"/><rect x="13" y="12" width="6" height="7" rx="1.5" fill="#fff7e8"/>
+  <path d="M16 14v3m-1.5-1.5L16 17l1.5-1.5" stroke="#8a5a20" stroke-width="1.2" fill="none" stroke-linecap="round"/></symbol></svg>
+</body>
+</html>
