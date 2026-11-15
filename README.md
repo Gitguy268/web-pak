@@ -20,7 +20,7 @@
 web-pak is the browser version of [pakket](https://github.com/Gitguy268/pakket), the terminal archiver. Drop files or folders and it compresses them; drop an archive and it opens. Everything happens on your own device: 7-Zip runs as WebAssembly in a background worker, and your files never leave the browser.
 
 <!-- live-links -->
-**Live:** [gitguy268.github.io/web-pak](https://gitguy268.github.io/web-pak/)
+**Live:** [gitguy268.github.io/web-pak](https://gitguy268.github.io/web-pak/) · [web-pak.vercel.app](https://web-pak.vercel.app)
 <!-- /live-links -->
 
 <!-- run-steps:start -->

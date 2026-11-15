@@ -12,7 +12,9 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const tmp = mkdtempSync(join(tmpdir(), 'web-pak-e2e-'));
 const port = 5200 + Math.floor(Math.random() * 400);
-const server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1', '-d', join(root, 'app')], { stdio: 'ignore' });
+// BASE_URL tests a deployed copy instead of serving app/ locally
+const base = process.env.BASE_URL;
+const server = base ? null : spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1', '-d', join(root, 'app')], { stdio: 'ignore' });
 const problems = [];
 const check = (ok, msg) => { if (!ok) problems.push(msg); else if (process.env.VERBOSE) console.log('ok', msg); };
 const has7zz = (() => { try { execFileSync('7zz', ['i'], { stdio: 'ignore' }); return true; } catch { return false; } })();
@@ -31,7 +33,7 @@ try {
   page.on('console', m => { if (m.type() === 'error') problems.push(`console: ${m.text()}`); });
   page.on('pageerror', e => problems.push(`pageerror: ${e.message}`));
   page.setDefaultTimeout(30000);
-  await page.goto(`http://127.0.0.1:${port}/`);
+  await page.goto(base || `http://127.0.0.1:${port}/`);
   await page.waitForSelector('#app:not([hidden])');
   check(await page.title() === 'web-pak', 'title');
 
@@ -124,7 +126,7 @@ try {
   try { problems.push('jobs: ' + (await browser.contexts()[0].pages()[0].textContent('#jobList'))); } catch { /* no page */ }
 } finally {
   await browser?.close();
-  server.kill();
+  server?.kill();
   rmSync(tmp, { recursive: true, force: true });
 }
 if (problems.length) { console.error([...new Set(problems)].join('\n')); process.exit(1); }
