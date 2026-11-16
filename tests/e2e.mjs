@@ -27,7 +27,8 @@ writeFileSync(join(tmp, 'data.json'), JSON.stringify({ spot: 'black lab', collar
 let browser;
 try {
   await new Promise(r => setTimeout(r, 600));
-  browser = await chromium.launch();
+  // BROWSER_PATH runs it in another Chromium, such as Brave (which turns off the folder API)
+  browser = await chromium.launch(process.env.BROWSER_PATH ? { executablePath: process.env.BROWSER_PATH } : {});
   const ctx = await browser.newContext({ acceptDownloads: true, viewport: { width: 1280, height: 860 } });
   const page = await ctx.newPage();
   page.on('console', m => { if (m.type() === 'error') problems.push(`console: ${m.text()}`); });
