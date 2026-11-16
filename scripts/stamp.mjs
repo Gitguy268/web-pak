@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, readdirSync, statSync, copyFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { check as checkVendor } from './vendor-7z.mjs';
 
 const root = join(fileURLToPath(import.meta.url), '../..');
 const files = [];
@@ -19,6 +20,9 @@ const stamp = h.digest('hex').slice(0, 16), tag = `<meta name="source-hash" cont
 const page = join(root, 'app/index.html');
 if (process.argv.includes('--check')) {
   if (!readFileSync(page, 'utf8').includes(tag)) { console.error(`app/ is out of date (sources ${stamp}). Run npm run build and commit app/.`); process.exit(1); }
+  // 7-Zip must ship byte-for-byte as published, in public/ and in the build
+  const bad = [...checkVendor(), ...checkVendor(join(root, 'app/vendor/7z-wasm')).map(f => `app/${f}`)];
+  if (bad.length) { console.error(`7z-wasm files differ from node_modules: ${bad.join(', ')}`); process.exit(1); }
   console.log(`app/ matches the sources (${stamp})`);
 } else {
   writeFileSync(page, readFileSync(page, 'utf8').replace('<head>', `<head>\n${tag}`));

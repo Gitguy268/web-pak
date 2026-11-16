@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/stamp.mjs",
+    "build": "node scripts/vendor-7z.mjs && vite build && node scripts/stamp.mjs",
     "check-build": "node scripts/stamp.mjs --check",
     "preview": "vite preview --port 5194 --strictPort",
     "typecheck": "tsc --noEmit",

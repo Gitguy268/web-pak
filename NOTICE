@@ -4,12 +4,14 @@ It bundles these libraries, each under its own licence:
 
 - 7-Zip 24.09 compiled to WebAssembly by 7z-wasm 1.2.0 (github.com/use-strict/7z-wasm):
   GNU LGPL 2.1 or later, plus the unRAR restriction for the RAR decompression code, which says
-  the unRAR code may not be used to re-create the RAR compression algorithm. 7-Zip is
-  copyright Igor Pavlov. The WebAssembly binary (app/assets/7zz-*.wasm) is shipped unchanged as
-  its own file, and 7z-wasm's small JavaScript loader is included unmodified in the worker
-  bundle. You can replace the .wasm file with your own build of the same 7z-wasm version
-  without rebuilding web-pak. The 7-Zip source code is at www.7-zip.org,
-  and the build scripts at github.com/use-strict/7z-wasm.
+  the unRAR code may not be used to re-create the RAR compression algorithm. 7-Zip is copyright
+  Igor Pavlov. It ships unchanged, byte for byte as published on npm, as its own files in
+  app/vendor/7z-wasm/: the loader 7zz.es6.js, the WebAssembly binary 7zz.wasm, its License.txt
+  and unRarLicense.txt, and the full LGPL 2.1 text (lgpl-2.1.txt). web-pak's worker loads it at
+  run time and doesn't bundle or modify it, so you can replace those files with your own build
+  of 7z-wasm (same module interface) without rebuilding web-pak. The 7-Zip source code is at
+  www.7-zip.org, and the build scripts at github.com/use-strict/7z-wasm. CI checks that the
+  shipped files match the npm package.
 - @bokuweb/zstd-wasm 0.0.27: MIT (JavaScript glue); zstd itself is BSD-3-Clause, copyright Meta
   Platforms, Inc. and affiliates.
 - brotli-wasm 3.0.1 (github.com/httptoolkit/brotli-wasm): Apache-2.0; brotli itself is MIT,

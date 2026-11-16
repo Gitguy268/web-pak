@@ -2,7 +2,15 @@
 // restriction, loaded unmodified as its own file). Each job gets a fresh 7-Zip instance with its
 // own in-memory file system. In a Web Worker the inputs are mounted with WORKERFS, which reads the
 // user's files lazily instead of copying them into memory first.
-import SevenZipFactory from '7z-wasm';
+type Factory = (opts?: Record<string, unknown>) => Promise<{ FS: unknown; WORKERFS: unknown; callMain(args: string[]): number }>;
+// The browser passes in 7-Zip's own loader (public/vendor/7z-wasm, shipped unchanged); Node, for the
+// tests, imports the npm package. The name is a variable so the bundler leaves it alone.
+let factory: Factory | undefined;
+export function setFactory(f: Factory) { factory = f; }
+async function getFactory(): Promise<Factory> {
+  if (!factory) { const name = '7z-wasm'; factory = (await import(/* @vite-ignore */ name)).default as Factory; }
+  return factory;
+}
 
 export interface InFile { path: string; data: Blob }
 export interface OutFile { path: string; data: Uint8Array; mtime?: number }
@@ -10,7 +18,8 @@ export interface Entry {
   path: string; size: number; packed: number; modified: string; dir: boolean;
   encrypted: boolean; crc: string; method: string; attributes: string;
 }
-type Module = Awaited<ReturnType<typeof SevenZipFactory>>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Module = { FS: any; WORKERFS: unknown; callMain(args: string[]): number };
 
 let wasmBinary: ArrayBuffer | undefined;
 let wasmUrl: string | undefined;
@@ -21,7 +30,7 @@ async function instance(onLine?: (s: string) => void) {
   if (!wasmBinary && wasmUrl) wasmBinary = await (await fetch(wasmUrl)).arrayBuffer();
   const lines: string[] = [];
   const push = (s: string) => { lines.push(s); onLine?.(s); };
-  const sz = await SevenZipFactory({ print: push, printErr: push, ...(wasmBinary ? { wasmBinary: wasmBinary.slice(0) } : {}) } as never);
+  const sz = (await (await getFactory())({ print: push, printErr: push, ...(wasmBinary ? { wasmBinary: wasmBinary.slice(0) } : {}) })) as Module;
   return { sz, lines };
 }
 

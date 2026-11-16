@@ -49,4 +49,4 @@ The engine tests make and extract every format, check passwords and age keys, sp
 | `public/` | icons, the web app manifest (file handlers, share target) and the service worker |
 | `app/` | the built app, committed so GitHub Pages and `start.command` need no build step |
 
-New dependencies need a licence that fits MIT and a line in NOTICE. 7-Zip (LGPL-2.1 with the unRAR restriction) is the one exception, loaded unmodified as its own WebAssembly file.
+New dependencies need a licence that fits MIT and a line in NOTICE. 7-Zip (LGPL-2.1 with the unRAR restriction) is the one exception: it ships unchanged as its own files in `public/vendor/7z-wasm/` (copied from npm by `npm run build`, checked by `npm run check-build`) and is loaded at run time, never bundled.

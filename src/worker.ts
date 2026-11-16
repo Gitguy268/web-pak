@@ -1,20 +1,23 @@
 // The engine runs here, off the main thread: one worker per job, so a job can be cancelled by
 // terminating its worker. Results go back as transferable buffers.
-import sevenWasm from '7z-wasm/7zz.wasm?url';
 import zstdWasm from '../node_modules/@bokuweb/zstd-wasm/dist/web/zstd.wasm?url';
-import { setWasmUrl } from './engine/sevenzip';
+import { setWasmUrl, setFactory } from './engine/sevenzip';
 import { setZstdWasmUrl } from './engine/codecs';
 import * as ops from './engine/ops';
 import { hashBlob, type Algo } from './engine/hashes';
 import { ageKeygen } from './engine/agecrypt';
 
-setWasmUrl(sevenWasm);
+// 7-Zip (LGPL) is loaded from its own unchanged files in vendor/, not bundled into this worker
+const SEVEN = new URL(/* @vite-ignore */ '../vendor/7z-wasm/', import.meta.url).href;
+setWasmUrl(SEVEN + '7zz.wasm');
 setZstdWasmUrl(zstdWasm);
+const ready = import(/* @vite-ignore */ SEVEN + '7zz.es6.js').then(m => setFactory(m.default));
 
 type Req = { id: number; op: string; args: Record<string, unknown> };
 const post = (m: unknown, transfer: Transferable[] = []) => (self as unknown as Worker).postMessage(m, transfer);
 
 self.onmessage = async (e: MessageEvent<Req>) => {
+  await ready;
   const { id, op, args: a } = e.data;
   const progress = (p: number, text?: string) => post({ id, kind: 'progress', p, text });
   try {

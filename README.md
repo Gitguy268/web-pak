@@ -162,4 +162,4 @@ Issues and pull requests are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md). Ru
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). 7-Zip is LGPL-2.1 with the unRAR restriction and is shipped unchanged as its own WebAssembly file; the other libraries are MIT, BSD-3-Clause, Apache-2.0 and ISC. See [NOTICE](NOTICE).
+MIT, see [LICENSE](LICENSE). 7-Zip is LGPL-2.1 with the unRAR restriction and ships unchanged as its own files in `app/vendor/7z-wasm/`, with its licences; the other libraries are MIT, BSD-3-Clause, Apache-2.0 and ISC. See [NOTICE](NOTICE).
