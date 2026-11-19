@@ -20,7 +20,7 @@
     "@bokuweb/zstd-wasm": "0.0.27",
     "age-encryption": "0.3.1",
     "brotli-wasm": "3.0.1",
-    "hash-wasm": "4.12.0",
+    "hash-wasm": "4.13.0",
     "lz4js": "0.2.0"
   },
   "devDependencies": {
